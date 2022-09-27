@@ -1,0 +1,3 @@
+[submodule "lib/submodule/libzip"]
+	path = lib/submodule/libzip
+	url = git@github.com:nih-at/libzip.git
