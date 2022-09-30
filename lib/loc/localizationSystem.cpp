@@ -3,7 +3,7 @@
 #include <fstream>
 #include <algorithm>
 #include <iostream>
-#include "zip.h"
+#include <dlfcn.h>
 
 typedef unsigned uint;
 
@@ -35,90 +35,38 @@ namespace loc {
         return str.c_str();
     }
 
-    enum class FileType{
-        file,
-        dir,
-        zip,
-        notLoc
-    };
-
-    FileType isLoc(std::filesystem::path path){
-        std::string strPath{path.string()};
-
-        if (strPath.erase(0, strPath.size() - 8) == ".loc.zip")
-            return FileType::zip;
-        else if(path.extension() == ".loc")
-            if (std::filesystem::is_directory(path))
-                return FileType::dir;
-            else
-                return FileType::file;
-        else
-            return FileType::notLoc;
-
-    }
-
     void readLocFile(std::filesystem::path path, std::u32string& files){
         std::u32string str{};
         std::basic_ifstream<char32_t> fin(path);
         std::getline(fin, str, U'\0');
         files += str + U'\n';
     }
-#if _MSC_VER >= 1900
-    std::u32string to_utf32(std::string const & s)
-    {
-        std::wstring_convert<std::codecvt_utf8<int32_t>, int32_t> convert;
-        auto asInt = convert.from_bytes(s);
-        return std::u32string(reinterpret_cast<char32_t const *>(asInt.data()), asInt.length());
-    }
 
-#else
-    std::u32string to_utf32(std::string s){
-        std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv{};
-        return conv.from_bytes(s);
-    }
-#endif
-
-    void readLocZip(std::filesystem::path path, std::u32string& files){
-        int err = 0;
-        zip *zipFile = zip_open(path.c_str(), 0, &err);
-
-        zip_int64_t numberFile{zip_get_num_entries(zipFile, 0)};
-
-        for (int i = 0; i < numberFile; ++i) {
-            struct zip_stat st;
-            zip_stat_init(&st);
-            zip_stat_index(zipFile, i, 0, &st);
-            std::string fileName{st.name};
-            if (fileName.erase(0, fileName.size() - 4) == ".loc"){
-                char * text = new char [st.size];
-
-                zip_file_t* fileInZip = zip_fopen_index(zipFile, i, 0);
-                zip_fread(fileInZip, text, st.size);
-                zip_fclose(fileInZip);
-
-                files += to_utf32(std::string{text}) + U'\n';
-            }
-
-        }
-    }
-
-    void readAllLocInDirectory(std::filesystem::path path, std::u32string& files){
+    void LocalizationSystem::readAllLocInDirectory(std::filesystem::path path, std::u32string& files){
         for (auto &languageFile: std::filesystem::directory_iterator(path)) {
-            switch (isLoc(languageFile.path().string())) {
-                case FileType::file:
-                    readLocFile(languageFile.path(), files);
-                    break;
-                case FileType::dir:
+            if(languageFile.path().extension() == ".loc") {
+                if (languageFile.is_directory()) {
                     readAllLocInDirectory(languageFile.path(), files);
-                    break;
-                case FileType::zip:
-                    readLocZip(languageFile.path(), files);
-                    break;
+                }
+                else {
+                    readLocFile(languageFile.path(), files);
+                }
+            }
+            else{
+                bool (*read)(std::filesystem::path path, std::u32string& files);
+                for (auto& module : modules) {
+                    *(void **) (&read) = dlsym(module, "read");
+                    if (read){
+                        if (read(languageFile.path(), files)){
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
 
-    std::u32string readAllLocInDirectory(std::filesystem::path path){
+    std::u32string LocalizationSystem::readAllLocInDirectory(std::filesystem::path path){
         std::u32string result;
         readAllLocInDirectory(path, result);
         return result;
@@ -187,5 +135,15 @@ namespace loc {
         }
 
         return result;
+    }
+
+    void LocalizationSystem::setModule(std::string path) {
+        modules.push_back(dlopen(path.c_str(), RTLD_LAZY));
+    }
+
+    LocalizationSystem::~LocalizationSystem() {
+        for (auto& module : modules) {
+            dlclose(module);
+        }
     }
 }

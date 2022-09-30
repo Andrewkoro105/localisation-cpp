@@ -28,17 +28,25 @@ namespace loc {
         std::string strDefaultLanguage;
         std::map<std::string, std::u32string>* defaultLanguage{nullptr};
 
+        std::vector<void* > modules;
+
+        virtual std::u32string readAllLocInDirectory(std::filesystem::path path);
+        virtual void readAllLocInDirectory(std::filesystem::path path, std::u32string& files);
     public:
-        void loadFromDirectory(std::filesystem::path path);
-        void clear();
+        virtual void loadFromDirectory(std::filesystem::path path);
+        virtual void clear();
 
-        void setNowLanguage(std::string language);
-        void setDefaultLanguage(std::string language);
+        virtual void setNowLanguage(std::string language);
+        virtual void setDefaultLanguage(std::string language);
 
-        std::u32string getText(std::string key);
-        std::u32string getText(std::string key, std::string language);
+        virtual std::u32string getText(std::string key);
+        virtual std::u32string getText(std::string key, std::string language);
 
-        std::vector<std::string> getLanguages();
+        virtual std::vector<std::string> getLanguages();
+
+        virtual void setModule(std::string path);
+
+        virtual ~LocalizationSystem();
     };
 
     static LocalizationSystem system;
