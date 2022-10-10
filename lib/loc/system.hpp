@@ -20,7 +20,7 @@ namespace loc {
         const char* what() const noexcept override;
     };
 
-    class LocalizationSystem {
+    class System {
     protected:
         std::map<std::string, std::map<std::string, std::u32string>> text;
         std::string strNowLanguage;
@@ -44,10 +44,10 @@ namespace loc {
 
         virtual std::vector<std::string> getLanguages();
 
-        virtual void setModule(std::string path);
+        virtual void setModules(std::vector<std::string> paths);
 
-        virtual ~LocalizationSystem();
+        virtual ~System();
     };
 
-    static LocalizationSystem system;
+    static System system;
 } // ui

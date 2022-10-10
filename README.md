@@ -33,6 +33,6 @@ spoon
 | std::vector<std::string> getLanguages()                       | Returns the list of loaded languages                                                            |
 | void setModule(std::string path)                              | Adds a module for reading the new file format                                                   |
 
-# Modules system 
+# Modules System 
 
 module is a dynamic library that stores a function `bool read(std::filesystem::path path, std::u32string& files)` which takes the path of the downloaded file and a link to a string with all the files, and returns whether the file was successfully read or not

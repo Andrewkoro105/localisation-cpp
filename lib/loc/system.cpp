@@ -1,8 +1,7 @@
-#include "localizationSystem.hpp"
+#include "system.hpp"
 
 #include <fstream>
 #include <algorithm>
-#include <iostream>
 #include <dlfcn.h>
 
 typedef unsigned uint;
@@ -42,7 +41,7 @@ namespace loc {
         files += str + U'\n';
     }
 
-    void LocalizationSystem::readAllLocInDirectory(std::filesystem::path path, std::u32string& files){
+    void System::readAllLocInDirectory(std::filesystem::path path, std::u32string& files){
         for (auto &languageFile: std::filesystem::directory_iterator(path)) {
             if(languageFile.path().extension() == ".loc") {
                 if (languageFile.is_directory()) {
@@ -53,9 +52,9 @@ namespace loc {
                 }
             }
             else{
-                bool (*read)(std::filesystem::path path, std::u32string& files);
+                bool (*read)(std::filesystem::path path, std::u32string& files){nullptr};
                 for (auto& module : modules) {
-                    *(void **) (&read) = dlsym(module, "read");
+                    read = (bool (*)(std::filesystem::path path, std::u32string& files))dlsym(module, "read");
                     if (read){
                         if (read(languageFile.path(), files)){
                             break;
@@ -66,13 +65,13 @@ namespace loc {
         }
     }
 
-    std::u32string LocalizationSystem::readAllLocInDirectory(std::filesystem::path path){
+    std::u32string System::readAllLocInDirectory(std::filesystem::path path){
         std::u32string result;
         readAllLocInDirectory(path, result);
         return result;
     }
 
-    void LocalizationSystem::loadFromDirectory(std::filesystem::path path) {
+    void System::loadFromDirectory(std::filesystem::path path) {
 
         std::u32string files{readAllLocInDirectory(path)};
 
@@ -96,7 +95,7 @@ namespace loc {
         }
     }
 
-    void LocalizationSystem::clear() {
+    void System::clear() {
         text.clear();
         nowLanguage = nullptr;
         defaultLanguage = nullptr;
@@ -104,17 +103,17 @@ namespace loc {
         strDefaultLanguage = "";
     }
 
-    void LocalizationSystem::setNowLanguage(std::string language) {
+    void System::setNowLanguage(std::string language) {
         strNowLanguage = language;
         nowLanguage = &text[language];
     }
 
-    void LocalizationSystem::setDefaultLanguage(std::string language) {
+    void System::setDefaultLanguage(std::string language) {
         strDefaultLanguage = language;
         defaultLanguage = &text[language];
     }
 
-    std::u32string LocalizationSystem::getText(std::string key) {
+    std::u32string System::getText(std::string key) {
         if (nowLanguage && nowLanguage->find(key) != nowLanguage->end())
             return (*nowLanguage)[key];
         else if (defaultLanguage && defaultLanguage->find(key) != defaultLanguage->end())
@@ -123,11 +122,11 @@ namespace loc {
             throw LocalizationNonexistentKeyException{strNowLanguage, strDefaultLanguage, key};
     }
 
-    std::u32string LocalizationSystem::getText(std::string key, std::string language) {
-        return LocalizationSystem::text[language][key];
+    std::u32string System::getText(std::string key, std::string language) {
+        return System::text[language][key];
     }
 
-    std::vector<std::string> LocalizationSystem::getLanguages() {
+    std::vector<std::string> System::getLanguages() {
         std::vector<std::string> result{};
 
         for (auto & pair : text) {
@@ -137,11 +136,13 @@ namespace loc {
         return result;
     }
 
-    void LocalizationSystem::setModule(std::string path) {
-        modules.push_back(dlopen(path.c_str(), RTLD_LAZY));
+    void System::setModules(std::vector<std::string> paths) {
+        for (auto path : paths) {
+            modules.push_back(dlopen(path.c_str(), RTLD_NOW));
+        }
     }
 
-    LocalizationSystem::~LocalizationSystem() {
+    System::~System() {
         for (auto& module : modules) {
             dlclose(module);
         }

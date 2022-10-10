@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "lib/loc/localizationSystem.hpp"
+#include "lib/loc/system.hpp"
 
 #ifdef _MSC_VER
 
@@ -22,13 +22,13 @@ std::string to_utf8(std::u32string const & s)
 #endif
 
 int main() {
-    loc::system.setModule("../../LocalizationZip/cmake-build-debug/libLocalizationZip.so");
+    loc::system.setModules({"../../LocalizationZip/cmake-build-debug/libLocalizationZip.so"});
 
     loc::system.loadFromDirectory("../test");
 
     loc::system.setDefaultLanguage("en");
     loc::system.setNowLanguage("ru");
 
-    std::u32string str32Test{loc::system.getText("in")};
+    std::u32string str32Test{loc::system.getText("text")};
     std::cout << to_utf8(str32Test) << std::endl;
 }
