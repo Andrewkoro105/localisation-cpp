@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.23)
-project(localisation)
+project(localization)
 
 set(CMAKE_CXX_STANDARD 17)
 
-file(GLOB_RECURSE src lib/loc/*.cpp lib/loc/*.hpp)
+add_library(${PROJECT_NAME} SHARED lib/system.cpp lib/system.hpp)
 
-add_library(${PROJECT_NAME} ${src})
+install(FILES lib/system.hpp DESTINATION loc)
 
 add_executable(${PROJECT_NAME}_ex main.cpp)
 
-target_link_libraries(${PROJECT_NAME}_ex PRIVATE ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_ex PUBLIC ${PROJECT_NAME})

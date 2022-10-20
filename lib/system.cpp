@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <algorithm>
-#include <dlfcn.h>
+//#include <dlfcn.h>
 
 typedef unsigned uint;
 
@@ -51,6 +51,7 @@ namespace loc {
                     readLocFile(languageFile.path(), files);
                 }
             }
+/*
             else{
                 bool (*read)(std::filesystem::path path, std::u32string& files){nullptr};
                 for (auto& module : modules) {
@@ -62,6 +63,7 @@ namespace loc {
                     }
                 }
             }
+*/
         }
     }
 
@@ -137,14 +139,19 @@ namespace loc {
     }
 
     void System::setModules(std::vector<std::string> paths) {
+/*
         for (auto path : paths) {
             modules.push_back(dlopen(path.c_str(), RTLD_NOW));
         }
+*/
     }
 
     System::~System() {
+/*
         for (auto& module : modules) {
             dlclose(module);
         }
+*/
     }
+
 }
