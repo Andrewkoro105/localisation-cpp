@@ -3,10 +3,12 @@ project(localisation)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(${PROJECT_NAME} lib/system.cpp lib/system.hpp)
+add_library(${PROJECT_NAME} lib/system.cpp)
 
 install(FILES lib/system.hpp DESTINATION loc)
 
 add_executable(${PROJECT_NAME}_ex main.cpp)
 
 target_link_libraries(${PROJECT_NAME}_ex PUBLIC ${PROJECT_NAME})
+
+include_directories(include)
