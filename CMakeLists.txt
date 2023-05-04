@@ -3,6 +3,9 @@ project(localisation)
 
 set(CMAKE_CXX_STANDARD 17)
 
+file(COPY lib/system.hpp DESTINATION ${CMAKE_SOURCE_DIR}/include/localisation)
+set(localisation_INCLUDE_DIRS include)
+
 add_library(${PROJECT_NAME} lib/system.cpp)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER lib/system.hpp)
