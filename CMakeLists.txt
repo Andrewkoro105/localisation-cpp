@@ -3,7 +3,7 @@ project(localisation)
 
 set(CMAKE_CXX_STANDARD 17)
 
-file(COPY lib/system.hpp DESTINATION ${CMAKE_SOURCE_DIR}/include/localisation)
+file(COPY lib/system.hpp DESTINATION ${CMAKE_CURRENT_LIST_DIR}/include/localisation)
 set(localisation_INCLUDE_DIRS include)
 
 add_library(${PROJECT_NAME} lib/system.cpp)
