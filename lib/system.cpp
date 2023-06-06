@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <algorithm>
-//#include <dlfcn.h>
 
 typedef unsigned uint;
 
@@ -51,19 +50,15 @@ namespace loc {
                     readLocFile(languageFile.path(), files);
                 }
             }
-/*
             else{
-                bool (*read)(std::filesystem::path path, std::u32string& files){nullptr};
+                bool (*read)(std::filesystem::path path, std::u32string& files);
                 for (auto& module : modules) {
-                    read = (bool (*)(std::filesystem::path path, std::u32string& files))dlsym(module, "read");
-                    if (read){
-                        if (read(languageFile.path(), files)){
-                            break;
-                        }
+                    read = module->getSim<bool (*)(std::filesystem::path path, std::u32string& files)>("read");
+                    if (read(languageFile.path(), files)){
+                        break;
                     }
                 }
             }
-*/
         }
     }
 
@@ -139,19 +134,15 @@ namespace loc {
     }
 
     void System::setModules(std::vector<std::string> paths) {
-/*
         for (auto path : paths) {
-            modules.push_back(dlopen(path.c_str(), RTLD_NOW));
+            modules.push_back(new openLib::DL{path});
         }
-*/
     }
 
     System::~System() {
-/*
         for (auto& module : modules) {
-            dlclose(module);
+            delete module;
         }
-*/
     }
 
 }

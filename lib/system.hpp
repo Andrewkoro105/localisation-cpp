@@ -5,6 +5,7 @@
 #include <string>
 #include <exception>
 #include <filesystem>
+#include <openLib/openLib.hpp>
 
 namespace loc {
 
@@ -28,7 +29,7 @@ namespace loc {
         std::string strDefaultLanguage;
         std::map<std::string, std::u32string>* defaultLanguage{nullptr};
 
-        std::vector<void* > modules;
+        std::vector<openLib::DL*> modules;
 
         virtual std::u32string readAllLocInDirectory(std::filesystem::path path);
         virtual void readAllLocInDirectory(std::filesystem::path path, std::u32string& files);
