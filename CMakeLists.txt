@@ -14,14 +14,14 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(OpenLib)
 
-add_library(${PROJECT_NAME} lib/system.cpp)
+add_library(${PROJECT_NAME} lib/localisation/system.cpp)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib>
         $<INSTALL_INTERFACE:include>
         )
 target_link_libraries(${PROJECT_NAME} PUBLIC openLib)
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER lib/system.hpp)
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER lib/localisation/system.hpp)
 
 add_executable(${PROJECT_NAME}_ex main.cpp)
 target_link_libraries(${PROJECT_NAME}_ex PUBLIC ${PROJECT_NAME})
