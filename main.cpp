@@ -22,13 +22,11 @@ std::string to_utf8(std::u32string const & s)
 #endif
 
 int main() {
-    loc::system.setModules({"../../LocalizationZip/cmake-build-debug/libLocalizationZip"});
+    loc::system.load_from_directory("../test");
 
-    loc::system.loadFromDirectory("../test");
+    loc::system.set_default_language("en");
+    loc::system.set_now_language("ru");
 
-    loc::system.setDefaultLanguage("en");
-    loc::system.setNowLanguage("ru");
-
-    std::u32string str32Test{loc::system.getText("in")};
-    std::cout << to_utf8(str32Test) << std::endl;
+    std::u32string str32_test{loc::system.get_text("text")};
+    std::cout << to_utf8(str32_test) << std::endl;
 }

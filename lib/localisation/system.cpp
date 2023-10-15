@@ -6,55 +6,55 @@
 typedef unsigned uint;
 
 namespace loc {
-    bool findNotSpace(const char32_t &a) {
+    bool find_not_space(const char32_t &a) {
         bool r = a != U' ' && a != U'\n' && a != U'\t';
         return r;
     }
 
-    bool findSpace(const char32_t &a) {
+    bool find_space(const char32_t &a) {
         return a == U' ' || a == U'\n' || a == U'\t';
     }
 
-    bool findQuoteMarks(const char32_t &a){
+    bool find_quote_marks(const char32_t &a){
         return a == U'"';
     }
 
-    std::u32string::iterator searchQuoteMark(std::u32string::iterator first, std::u32string::iterator last){
+    std::u32string::iterator search_quote_mark(std::u32string::iterator first, std::u32string::iterator last){
         std::u32string::iterator result;
-        while ((result = std::find_if(first, last, findQuoteMarks)) != last && *(result - 1) == U'\\');
+        while ((result = std::find_if(first, last, find_quote_marks)) != last && *(result - 1) == U'\\');
         return result;
     }
 
-    LocalizationNonexistentKeyException::LocalizationNonexistentKeyException(std::string nowLanguage, std::string defaultLanguage, std::string key) :
-        nowLanguage(nowLanguage), defaultLanguage(defaultLanguage), key(key),
-        str(std::string{"could not find the key '"} + key + std::string{"' in either the specified language '"} + nowLanguage + std::string{"' or the standard '"} + defaultLanguage + std::string{"'"}){}
+    LocalizationNonexistentKeyException::LocalizationNonexistentKeyException(std::string now_language, std::string default_language, std::string key) :
+        now_language(now_language), default_language(default_language), key(key),
+        str(std::string{"could not find the key '"} + key + std::string{"' in either the specified language '"} + now_language + std::string{"' or the standard '"} + default_language + std::string{"'"}){}
 
     const char *LocalizationNonexistentKeyException::what() const noexcept {
         return str.c_str();
     }
 
-    void readLocFile(std::filesystem::path path, std::u32string& files){
+    void read_loc_file(std::filesystem::path path, std::u32string& files){
         std::u32string str{};
         std::basic_ifstream<char32_t> fin(path);
         std::getline(fin, str, U'\0');
         files += str + U'\n';
     }
 
-    void System::readAllLocInDirectory(std::filesystem::path path, std::u32string& files){
-        for (auto &languageFile: std::filesystem::directory_iterator(path)) {
-            if(languageFile.path().extension() == ".loc") {
-                if (languageFile.is_directory()) {
-                    readAllLocInDirectory(languageFile.path(), files);
+    void System::read_all_loc_in_directory(std::filesystem::path path, std::u32string& files){
+        for (auto &language_file: std::filesystem::directory_iterator(path)) {
+            if(language_file.path().extension() == ".loc") {
+                if (language_file.is_directory()) {
+                    read_all_loc_in_directory(language_file.path(), files);
                 }
                 else {
-                    readLocFile(languageFile.path(), files);
+                    read_loc_file(language_file.path(), files);
                 }
             }
             else{
                 bool (*read)(std::filesystem::path path, std::u32string& files);
                 for (auto& module : modules) {
-                    read = module->getSim<bool (*)(std::filesystem::path path, std::u32string& files)>("read");
-                    if (read(languageFile.path(), files)){
+                    read = module->get_sim<bool (*)(std::filesystem::path path, std::u32string& files)>("read");
+                    if (read(language_file.path(), files)){
                         break;
                     }
                 }
@@ -62,68 +62,68 @@ namespace loc {
         }
     }
 
-    std::u32string System::readAllLocInDirectory(std::filesystem::path path){
+    std::u32string System::read_all_loc_in_directory(std::filesystem::path path){
         std::u32string result;
-        readAllLocInDirectory(path, result);
+        read_all_loc_in_directory(path, result);
         return result;
     }
 
-    void System::loadFromDirectory(std::filesystem::path path) {
+    void System::load_from_directory(std::filesystem::path path) {
 
-        std::u32string files{readAllLocInDirectory(path)};
+        std::u32string files{read_all_loc_in_directory(path)};
 
         std::string key;
 
         std::u32string::iterator cursor = files.begin();
-        while ((cursor = std::find_if(cursor, files.end(), findNotSpace)) != files.end()){
+        while ((cursor = std::find_if(cursor, files.end(), find_not_space)) != files.end()){
             if (*cursor == U'"'){
-                std::u32string::iterator endText{searchQuoteMark(cursor + 1, files.end())};
-                (*nowLanguage)[key] = {cursor + 1, endText};
-                cursor = endText + 1;
+                std::u32string::iterator end_text{search_quote_mark(cursor + 1, files.end())};
+                (*now_language)[key] = {cursor + 1, end_text};
+                cursor = end_text + 1;
             } else{
-                std::u32string::iterator endName{std::find_if(cursor, files.end(), findSpace)};
+                std::u32string::iterator end_name{std::find_if(cursor, files.end(), find_space)};
                 if (*cursor == U'-'){
-                    nowLanguage = &text[{cursor + 1, endName}];
+                    now_language = &text[{cursor + 1, end_name}];
                 } else{
-                    key = {cursor, endName};
+                    key = {cursor, end_name};
                 }
-                cursor = endName;
+                cursor = end_name;
             }
         }
     }
 
     void System::clear() {
         text.clear();
-        nowLanguage = nullptr;
-        defaultLanguage = nullptr;
-        strNowLanguage = "";
-        strDefaultLanguage = "";
+        now_language = nullptr;
+        default_language = nullptr;
+        str_now_language = "";
+        str_default_language = "";
     }
 
-    void System::setNowLanguage(std::string language) {
-        strNowLanguage = language;
-        nowLanguage = &text[language];
+    void System::set_now_language(std::string language) {
+        str_now_language = language;
+        now_language = &text[language];
     }
 
-    void System::setDefaultLanguage(std::string language) {
-        strDefaultLanguage = language;
-        defaultLanguage = &text[language];
+    void System::set_default_language(std::string language) {
+        str_default_language = language;
+        default_language = &text[language];
     }
 
-    std::u32string System::getText(std::string key) {
-        if (nowLanguage && nowLanguage->find(key) != nowLanguage->end())
-            return (*nowLanguage)[key];
-        else if (defaultLanguage && defaultLanguage->find(key) != defaultLanguage->end())
-            return (*defaultLanguage)[key];
+    std::u32string System::get_text(std::string key) {
+        if (now_language && now_language->find(key) != now_language->end())
+            return (*now_language)[key];
+        else if (default_language && default_language->find(key) != default_language->end())
+            return (*default_language)[key];
         else
-            throw LocalizationNonexistentKeyException{strNowLanguage, strDefaultLanguage, key};
+            throw LocalizationNonexistentKeyException{str_now_language, str_default_language, key};
     }
 
-    std::u32string System::getText(std::string key, std::string language) {
+    std::u32string System::get_text(std::string key, std::string language) {
         return System::text[language][key];
     }
 
-    std::vector<std::string> System::getLanguages() {
+    std::vector<std::string> System::get_languages() {
         std::vector<std::string> result{};
 
         for (auto & pair : text) {
@@ -133,9 +133,9 @@ namespace loc {
         return result;
     }
 
-    void System::setModules(std::vector<std::string> paths) {
+    void System::set_modules(std::vector<std::string> paths) {
         for (auto path : paths) {
-            modules.push_back(new openLib::DL{path});
+            modules.push_back(new open_lib::DL{path});
         }
     }
 

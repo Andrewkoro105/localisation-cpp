@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 3.23)
-project(localisation)
+project(localisation-cpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
 include(FetchContent)
 
 FetchContent_Declare(
-        OpenLib
-        GIT_REPOSITORY https://github.com/Andrewkoro105/OpenLib.git
+        open-lib
+        GIT_REPOSITORY https://github.com/Andrewkoro105/open-lib.git
         GIT_TAG master
-        FIND_PACKAGE_ARGS NAMES openLib
+        FIND_PACKAGE_ARGS NAMES open-lib
 )
 
-FetchContent_MakeAvailable(OpenLib)
+FetchContent_MakeAvailable(open-lib)
 
 add_library(${PROJECT_NAME} lib/localisation/system.cpp)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -20,7 +20,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib>
         $<INSTALL_INTERFACE:include>
         )
-target_link_libraries(${PROJECT_NAME} PUBLIC openLib)
+target_link_libraries(${PROJECT_NAME} PUBLIC open-lib)
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER lib/localisation/system.hpp)
 
 add_executable(${PROJECT_NAME}_ex main.cpp)
