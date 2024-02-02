@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.23)
 project(localisation-cpp)
-
 set(CMAKE_CXX_STANDARD 17)
 
 include(FetchContent)
+
+option(localisation_ENABLE_INSTALL "Enable install rule" ON)
 
 FetchContent_Declare(
         open-lib
@@ -26,14 +27,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER lib/localisation/
 add_executable(${PROJECT_NAME}_ex main.cpp)
 target_link_libraries(${PROJECT_NAME}_ex PUBLIC ${PROJECT_NAME})
 
-install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}
-        LIBRARY DESTINATION lib
-        PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}
-        )
+if (localisation_ENABLE_INSTALL)
+        install(TARGETS ${PROJECT_NAME}
+                EXPORT ${PROJECT_NAME}
+                LIBRARY DESTINATION lib
+                PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}
+                )
 
-install(EXPORT ${PROJECT_NAME}
-        FILE ${PROJECT_NAME}Config.cmake
-        NAMESPACE ${PROJECT_NAME}::
-        DESTINATION lib/cmake/${PROJECT_NAME}
-        )
+        install(EXPORT ${PROJECT_NAME}
+                FILE ${PROJECT_NAME}Config.cmake
+                NAMESPACE ${PROJECT_NAME}::
+                DESTINATION lib/cmake/${PROJECT_NAME}
+                )
+endif ()
