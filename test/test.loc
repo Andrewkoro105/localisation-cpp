@@ -1,0 +1,6 @@
+t -en "test" -ru "тест"
+
+-ru
+	t2 "тест2"
+-en
+	t2 "test2"
