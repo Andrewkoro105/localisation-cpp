@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <algorithm>
-#include <option_result/option_result.hpp>
 
 typedef unsigned uint;
 
